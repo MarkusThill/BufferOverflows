@@ -11,8 +11,7 @@
 #define PORT 7777
 #define BUF_SIZE 1024
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	int sock, run, r;
 	char buf[BUF_SIZE];
 	struct sockaddr_in server;
